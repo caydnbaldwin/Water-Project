@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Project } from "./types/Project";
 
-function ProjectList() {
+function ProjectList({ selectedCategories }: { selectedCategories: string[] }) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [pageSize, setPageSize] = useState<number>(10);
   const [pageNum, setPageNum] = useState<number>(1);
@@ -10,8 +10,12 @@ function ProjectList() {
 
   useEffect(() => {
     const fetchProjects = async () => {
+      const categoryParams = selectedCategories
+        .map((category) => `projectType=${encodeURIComponent(category)}`)
+        .join("&");
+
       const response = await fetch(
-        `https://localhost:5000/api/Water/AllProjects?pageSize=${pageSize}&pageNum=${pageNum}`
+        `https://localhost:5000/Water/AllProjects?pageSize=${pageSize}&pageNum=${pageNum}${selectedCategories.length ? `&${categoryParams}` : ""}`
       );
       const data = await response.json();
       setProjects(data.projects);
@@ -20,13 +24,10 @@ function ProjectList() {
     };
 
     fetchProjects();
-  }, [pageSize, pageNum, totalItems]);
+  }, [pageSize, pageNum, totalItems, selectedCategories]);
 
   return (
     <>
-      <h1>Water Projects</h1>
-      <br />
-
       {projects.map((project) => (
         <div id="projectCard" className="card" key={project.projectId}>
           <h3 className="card-title">{project.projectName}</h3>
@@ -65,7 +66,11 @@ function ProjectList() {
           Previous
         </button>
         {[...Array(totalPages)].map((_, numPage) => (
-          <button key={numPage + 1} onClick={() => setPageNum(numPage + 1)} disabled={pageNum === numPage + 1}>
+          <button
+            key={numPage + 1}
+            onClick={() => setPageNum(numPage + 1)}
+            disabled={pageNum === numPage + 1}
+          >
             {numPage + 1}
           </button>
         ))}
@@ -82,8 +87,8 @@ function ProjectList() {
         <select
           value={pageSize}
           onChange={(size) => {
-            setPageSize(Number(size.target.value))
-            setPageNum(1)
+            setPageSize(Number(size.target.value));
+            setPageNum(1);
           }}
         >
           <option value="5">5</option>
