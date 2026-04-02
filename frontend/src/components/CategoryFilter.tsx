@@ -17,7 +17,6 @@ function CategoryFilter({
           "https://localhost:5000/Water/GetProjectTypes"
         );
         const data = await response.json();
-        console.log("Fetched categories:", data);
         setCategories(data);
       } catch (error) {
         console.error("Error fetching categories", error);
